@@ -1008,7 +1008,6 @@ tLimMlmOemDataRsp       *gpLimMlmOemDataRsp;
     tLimDisassocDeauthCnfReq limDisassocDeauthCnfReq;
     tANI_U8 deferredMsgCnt;
     tSirDFSChannelList    dfschannelList;
-    tANI_U8 deauthMsgCnt;
     tANI_U8 gLimIbssStaLimit;
 
     /* Number of channel switch IEs sent so far */
