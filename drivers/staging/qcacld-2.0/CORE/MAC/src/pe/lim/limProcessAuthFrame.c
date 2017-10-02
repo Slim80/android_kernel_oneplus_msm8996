@@ -297,7 +297,7 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
             goto free;
         }
 
-        if (frameLen < LIM_ENCR_AUTH_BODY_LEN)
+        if (frameLen < LIM_ENCR_AUTH_BODY_LEN_SAP)
         {
             // Log error
             limLog(pMac, LOGE,
@@ -979,7 +979,11 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
                             /*
                              * get random bytes and use as challenge text
                              */
+<<<<<<< HEAD
                             if( !VOS_IS_STATUS_SUCCESS( vos_rand_get_bytes( 0, (tANI_U8 *)challengeTextArray, SIR_MAC_AUTH_CHALLENGE_LENGTH ) ) )
+=======
+                            if( !VOS_IS_STATUS_SUCCESS( vos_rand_get_bytes( 0, (tANI_U8 *)challengeTextArray, SIR_MAC_SAP_AUTH_CHALLENGE_LENGTH ) ) )
+>>>>>>> 08dd28a... qcacld-2.0: Set length of challenge text sent by SAP to 128
                             {
                                limLog(pMac, LOGE,FL("Challenge text preparation failed in limProcessAuthFrame"));
                                goto free;
@@ -1001,11 +1005,18 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
                             pRxAuthFrameBody->authTransactionSeqNumber + 1;
                             authFrame->authStatusCode =
                             eSIR_MAC_SUCCESS_STATUS;
+<<<<<<< HEAD
                             authFrame->type   = SIR_MAC_CHALLENGE_TEXT_EID;
                             authFrame->length = SIR_MAC_AUTH_CHALLENGE_LENGTH;
                             vos_mem_copy(authFrame->challengeText,
+=======
+
+                            authFrame.type   = SIR_MAC_CHALLENGE_TEXT_EID;
+                            authFrame.length = SIR_MAC_SAP_AUTH_CHALLENGE_LENGTH;
+                            vos_mem_copy(authFrame.challengeText,
+>>>>>>> 08dd28a... qcacld-2.0: Set length of challenge text sent by SAP to 128
                                          pAuthNode->challengeText,
-                                         SIR_MAC_AUTH_CHALLENGE_LENGTH);
+                                         SIR_MAC_SAP_AUTH_CHALLENGE_LENGTH);
 
                             limSendAuthMgmtFrame(
                                                 pMac, authFrame,
@@ -1579,7 +1590,7 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
 
                 if (vos_mem_compare(pRxAuthFrameBody->challengeText,
                                     pAuthNode->challengeText,
-                                    SIR_MAC_AUTH_CHALLENGE_LENGTH))
+                                    SIR_MAC_SAP_AUTH_CHALLENGE_LENGTH))
                 {
                     /// Challenge match. STA is autheticated !
 
