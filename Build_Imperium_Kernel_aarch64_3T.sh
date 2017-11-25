@@ -15,7 +15,7 @@ FINALKERNEL="/home/slim80/Scrivania/Kernel/oneplus/Imperium/Final_Kernel"
 IMAGE="/home/slim80/Scrivania/Kernel/oneplus/Imperium/Imperium_Kernel_O/arch/arm64/boot"
 ANYKERNEL="/home/slim80/Scrivania/Kernel/oneplus/Imperium/Imperium_Kernel_O/AnyKernel"
 NUM_CPUS=`grep -c ^processor /proc/cpuinfo`
-VERSION=1.0-beta1
+VERSION=1.0
 
 find -name '*.gz*' -exec rm -rf {} \;
 find -name '*.dtb' -exec rm -rf {} \;
