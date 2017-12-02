@@ -29,7 +29,7 @@ ramdisk_compression=auto;
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
-chmod -R root:root $ramdisk/*;
+chown -R root:root $ramdisk/*;
 chmod 775 $ramdisk/sbin
 chmod 755 $ramdisk/sbin/busybox
 
