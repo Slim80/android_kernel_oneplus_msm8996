@@ -958,6 +958,7 @@ tSirRetStatus peOpen(tpAniSirGlobal pMac, tMacOpenParameters *pMacOpenParam)
         status = eSIR_FAILURE;
         goto pe_open_lock_fail;
     }
+    pMac->lim.deauthMsgCnt = 0;
     pMac->lim.retry_packet_cnt = 0;
     pMac->lim.gLimIbssRetryCnt = 0;
 
