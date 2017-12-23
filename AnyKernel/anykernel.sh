@@ -4,7 +4,7 @@
 ## AnyKernel setup
 # begin properties
 properties() {
-kernel.string=Imperium-Kernel by Slim80 @xda-developers
+kernel.string=Imperium Kernel by Slim80 @xda-developers
 do.devicecheck=0
 do.initd=0
 do.modules=1
