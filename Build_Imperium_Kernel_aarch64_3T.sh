@@ -21,6 +21,7 @@ find -name '*.gz*' -exec rm -rf {} \;
 find -name '*.dtb' -exec rm -rf {} \;
 find -name '*.ko' -exec rm -rf {} \;
 rm -rf $ANYKERNEL/zImage
+rm -rf $BUILDKERNEL/Slim80/kernel/*
 
 rm -rf ~/.ccache
 ccache -C
