@@ -501,7 +501,7 @@ static bool tlshim_is_pkt_drop_candidate(tp_wma_handle wma_handle,
 
 	peer = ol_txrx_find_peer_by_addr(pdev_ctx, peer_addr, &peer_id);
 	if (!peer) {
-		if (SIR_MAC_MGMT_ASSOC_REQ != subtype) {
+		if (IEEE80211_FC0_SUBTYPE_ASSOC_REQ != subtype) {
 			TLSHIM_LOGE(FL("Received mgmt frame: %0x from unknow peer: %pM"),
 				subtype, peer_addr);
 			should_drop = TRUE;
@@ -510,7 +510,7 @@ static bool tlshim_is_pkt_drop_candidate(tp_wma_handle wma_handle,
 	}
 
 	switch (subtype) {
-	case SIR_MAC_MGMT_ASSOC_REQ:
+	case IEEE80211_FC0_SUBTYPE_ASSOC_REQ:
 		if (peer->last_assoc_rcvd) {
 			if (adf_os_gettimestamp() - peer->last_assoc_rcvd <
 			    TLSHIM_MGMT_FRAME_DETECT_DOS_TIMER) {
@@ -520,7 +520,7 @@ static bool tlshim_is_pkt_drop_candidate(tp_wma_handle wma_handle,
 		}
 		peer->last_assoc_rcvd = adf_os_gettimestamp();
 		break;
-	case SIR_MAC_MGMT_DISASSOC:
+	case IEEE80211_FC0_SUBTYPE_DISASSOC:
 		if (peer->last_disassoc_rcvd) {
 			if (adf_os_gettimestamp() -
 			    peer->last_disassoc_rcvd <
@@ -531,7 +531,7 @@ static bool tlshim_is_pkt_drop_candidate(tp_wma_handle wma_handle,
 		}
 		peer->last_disassoc_rcvd = adf_os_gettimestamp();
 		break;
-	case SIR_MAC_MGMT_DEAUTH:
+	case IEEE80211_FC0_SUBTYPE_DEAUTH:
 		if (peer->last_deauth_rcvd) {
 			if (adf_os_gettimestamp() -
 			    peer->last_deauth_rcvd <
@@ -596,9 +596,11 @@ static int tlshim_mgmt_rx_process(void *context, u_int8_t *data,
 		return 0;
 	}
 
-	if (hdr->buf_len < sizeof(struct ieee80211_frame)) {
+	if (hdr->buf_len < sizeof(struct ieee80211_frame) ||
+		hdr->buf_len > data_len) {
 		adf_os_spin_unlock_bh(&tl_shim->mgmt_lock);
-		TLSHIM_LOGE("Invalid rx mgmt packet");
+		TLSHIM_LOGE("Invalid rx mgmt packet, data_len %u, hdr->buf_len %u",
+				data_len, hdr->buf_len);
 		return 0;
 	}
 
@@ -2150,7 +2152,7 @@ uint16_t tl_shim_get_sta_id_by_addr(void *vos_context, uint8_t *mac_addr)
 	uint8_t peer_id;
 
 	if (vos_context == NULL || mac_addr == NULL) {
-		TLSHIM_LOGE("Invalid argument %p, %p", vos_context, mac_addr);
+		TLSHIM_LOGE("Invalid argument %pK, %pK", vos_context, mac_addr);
 		return 0;
 	}
 
@@ -2181,7 +2183,7 @@ void *tl_shim_get_vdev_by_addr(void *vos_context, uint8_t *mac_addr)
 	uint8_t peer_id;
 
 	if (vos_context == NULL || mac_addr == NULL) {
-		TLSHIM_LOGE("Invalid argument %p, %p", vos_context, mac_addr);
+		TLSHIM_LOGE("Invalid argument %pK, %pK", vos_context, mac_addr);
 		return NULL;
 	}
 
