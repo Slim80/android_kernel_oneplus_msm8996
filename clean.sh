@@ -23,6 +23,8 @@ find -name '*.dtb' -exec rm -rf {} \;
 find -name '*.ko' -exec rm -rf {} \;
 rm -rf $ANYKERNEL/zImage
 rm -rf $BUILDKERNEL/Slim80/kernel/*
+rm -rf $ANYKERNEL/Imperium_Kernel.zip
+rm -rf $BUILDKERNEL/Imperium_Kernel_OP3T_OSS_Oreo_v*
 
 make clean
 make distclean
