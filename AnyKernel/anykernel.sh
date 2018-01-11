@@ -9,7 +9,7 @@ do.devicecheck=0
 do.initd=0
 do.modules=1
 do.cleanup=1
-do.cleanuponabort=0
+do.cleanuponabort=1
 device.name1=oneplus3t
 device.name2=OnePlus3T
 device.name3=OnePlus 3T
@@ -30,17 +30,20 @@ ramdisk_compression=auto;
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
 chown -R root:root $ramdisk/*;
-chmod 775 $ramdisk/sbin
 chmod 755 $ramdisk/sbin/busybox
-
 
 ## AnyKernel install
 dump_boot;
 
 # begin ramdisk changes
 
-# init.qcom.rc
-insert_line init.qcom.rc "init.imperium.rc" after "import init.qcom.usb.rc" "import init.imperium.rc";
+# init.rc
+remove_line init.rc "import init.imperium.rc";
+insert_line init.rc "init.imperium.rc" after "import /init.usb.rc" "import /init.imperium.rc";
+
+# build.prop Tweaks
+insert_line default.prop "ro.vendor.qti.sys.fw.bg_apps_limit=60" before "ro.oxygen.version" "ro.vendor.qti.sys.fw.bg_apps_limit=60";
+insert_line default.prop "ro.vendor.qti.config.zram=false" before "ro.oxygen.version" "ro.vendor.qti.config.zram=false";
 
 # end ramdisk changes
 

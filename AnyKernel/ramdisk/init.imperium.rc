@@ -5,6 +5,9 @@ on property:sys.boot_completed=1
     write /sys/module/lowmemorykiller/parameters/debug_level 0
     write /sys/module/xt_qtaguid/parameters/debug_mask 0
     
+    # Set idle GPU to 100 Mhz
+    write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 6
+
     # setprop
     setprop persist.adb.notify 0
     setprop persist.service.adb.enable 1
@@ -13,9 +16,3 @@ on property:sys.boot_completed=1
     setprop profiler.force_disable_err_rpt 1
     setprop ro.kernel.checkjni 0
     setprop ro.kernel.android.checkjni 0
-    setprop wifi.supplicant_scan_interval 360
-    
-    exec u:r:init:s0 root root -- /init.supolicy.sh
-    exec u:r:init:s0 root root -- /init.special_power.sh
-    exec u:r:supersu:s0 root root -- /init.supolicy.sh
-    exec u:r:supersu:s0 root root -- /init.special_power.sh
