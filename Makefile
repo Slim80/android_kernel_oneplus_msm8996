@@ -405,7 +405,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
 		   -Wno-unused-variable -Wno-unused -Wno-maybe-uninitialized \
-		   -mcpu=cortex-a57 -mtune=cortex-a57 \
+		   -mcpu=cortex-a57+crc+crypto -mtune=cortex-a57 \
 		   -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=
