@@ -38,12 +38,8 @@ dump_boot;
 # begin ramdisk changes
 
 # init.rc
-remove_line init.rc "import init.imperium.rc";
-insert_line init.rc "init.imperium.rc" after "import /init.usb.rc" "import /init.imperium.rc";
-
-# build.prop Tweaks
-insert_line default.prop "ro.vendor.qti.sys.fw.bg_apps_limit=60" before "ro.oxygen.version" "ro.vendor.qti.sys.fw.bg_apps_limit=60";
-insert_line default.prop "ro.vendor.qti.config.zram=false" before "ro.oxygen.version" "ro.vendor.qti.config.zram=false";
+remove_line init.rc "import /init.imperium.rc";
+insert_line init.rc "init.imperium.rc" after "import /init.usb.configfs.rc" "import /init.imperium.rc";
 
 # end ramdisk changes
 
