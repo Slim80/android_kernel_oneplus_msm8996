@@ -178,7 +178,7 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
                FL("received Authentication frame with no body from "));
         limPrintMacAddr(pMac, pHdr->sa, LOGE);
 
-        return;
+        goto free;
     }
 
     if (limIsGroupAddr(pHdr->sa))
@@ -189,7 +189,7 @@ limProcessAuthFrame(tpAniSirGlobal pMac, tANI_U8 *pRxPacketInfo, tpPESession pse
                FL("received Auth frame from a BC/MC address - "));)
         PELOGE( limPrintMacAddr(pMac, pHdr->sa, LOGE);)
 
-        return;
+        goto free;
     }
     currSeqNum = (pHdr->seqControl.seqNumHi << 4) |
                     (pHdr->seqControl.seqNumLo);
