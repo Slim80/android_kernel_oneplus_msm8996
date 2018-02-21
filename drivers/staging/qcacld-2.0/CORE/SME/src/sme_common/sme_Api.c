@@ -1000,6 +1000,7 @@ sme_process_cmd:
                         case eSmeCommandWmStatusChange:
                             csrLLUnlock( &pMac->sme.smeCmdActiveList );
                             csrRoamProcessWmStatusChangeCommand(pMac, pCommand);
+                            fContinue = eANI_BOOLEAN_TRUE;
                             break;
 
                         case eSmeCommandSetKey:
@@ -1668,7 +1669,7 @@ eHalStatus sme_SetPlmRequest(tHalHandle hHal, tpSirPlmReq pPlmReq)
     eHalStatus status;
     tANI_BOOLEAN ret = eANI_BOOLEAN_FALSE;
     tpAniSirGlobal pMac = PMAC_STRUCT(hHal);
-    tANI_U8 ch_list[WNI_CFG_VALID_CHANNEL_LIST] = {0};
+    tANI_U8 ch_list[WNI_CFG_VALID_CHANNEL_LIST_LEN] = {0};
     tANI_U8 count, valid_count = 0;
     vos_msg_t msg;
 
@@ -1893,6 +1894,9 @@ eHalStatus sme_UpdateConfig(tHalHandle hHal, tpSmeConfigParams pSmeConfigParams)
 
    pMac->sta_auth_retries_for_code17 =
          pSmeConfigParams->csrConfig.sta_auth_retries_for_code17;
+
+   pMac->sta_change_cc_via_beacon =
+         pSmeConfigParams->sta_change_cc_via_beacon;
 
    return status;
 }
@@ -2306,6 +2310,30 @@ void sme_set_allowed_action_frames(tHalHandle hal,
 	}
 
 	return;
+}
+
+/**
+ * sme_handle_cc_change_ind() - handle new country code
+ * @hal_ptr: Handler to HAL
+ * @msg_buf: contain new country code.
+ *
+ * Return: eHAL_STATUS_SUCCESS on success,
+ * eHAL_STATUS_INVALID_PARAMETER on failure.
+ */
+eHalStatus sme_handle_cc_change_ind(tHalHandle hal_ptr, void *msg_buf)
+{
+	eHalStatus status = eHAL_STATUS_FAILURE;
+	tpAniSirGlobal mac_ptr = PMAC_STRUCT(hal_ptr);
+	v_REGDOMAIN_t domainId;
+	struct sme_change_country_code_ind * change_cc_ind =
+			 (struct sme_change_country_code_ind *)msg_buf;
+
+	status =
+		csrGetRegulatoryDomainForCountry(mac_ptr,
+						 change_cc_ind->country_code,
+						 &domainId, COUNTRY_IE);
+
+	return (status);
 }
 
 /*--------------------------------------------------------------------------
@@ -2962,6 +2990,18 @@ eHalStatus sme_ProcessMsg(tHalHandle hHal, vos_msg_t* pMsg)
                 {
                    smsLog(pMac, LOGE, "Empty rsp message for meas "
                           "(eWNI_SME_PRE_SWITCH_CHL_IND), nothing to process");
+                }
+                break;
+          case eWNI_SME_CC_CHANGE_IND:
+                if(pMsg->bodyptr)
+                {
+                   status = sme_handle_cc_change_ind(pMac,pMsg->bodyptr);
+                   vos_mem_free(pMsg->bodyptr);
+                }
+                else
+                {
+                   smsLog(pMac, LOGE, "Empty rsp message for meas "
+                          "(eWNI_SME_CC_CHANGE_IND), nothing to process");
                 }
                 break;
           case eWNI_SME_POST_SWITCH_CHL_IND:
@@ -5067,6 +5107,9 @@ eHalStatus sme_GetConfigParam(tHalHandle hHal, tSmeConfigParams *pParam)
       pParam->sub20_config_info = pMac->sub20_config_info;
       pParam->sub20_channelwidth = pMac->sub20_channelwidth;
       pParam->sub20_dynamic_channelwidth = pMac->sub20_dynamic_channelwidth;
+      pParam->sta_change_cc_via_beacon = pMac->sta_change_cc_via_beacon;
+      pParam->csrConfig.gStaLocalEDCAEnable =
+              pMac->roam.configParam.gStaLocalEDCAEnable;
       sme_ReleaseGlobalLock( &pMac->sme );
    }
 
@@ -14528,6 +14571,28 @@ eHalStatus sme_set_cts2self_for_p2p_go(tHalHandle hal_handle)
 	return status;
 }
 
+/**
+ * sme_set_ac_txq_optimize() - sme function to set ini parms to FW.
+ * @hal_handle:                    reference to the HAL
+ * @value                          reference to the value
+ * Return: hal_status
+ */
+eHalStatus sme_set_ac_txq_optimize(tHalHandle hal_handle, uint8_t *value)
+{
+	eHalStatus status = eHAL_STATUS_SUCCESS;
+	vos_msg_t vos_msg;
+
+	vos_msg.bodyptr = value;
+	vos_msg.type = WDA_SET_AC_TXQ_OPTIMIZE;
+	if (!VOS_IS_STATUS_SUCCESS(vos_mq_post_message(VOS_MODULE_ID_WDA,
+						       &vos_msg))) {
+		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+			  FL("Failed to post WDA_SET_AC_TXQ_OPTIMIZE to WDA"));
+		status = eHAL_STATUS_FAILURE;
+	}
+	return status;
+}
+
 eHalStatus sme_ConfigEnablePowerSave (tHalHandle hHal, tPmcPowerSavingMode psMode)
 {
    eHalStatus status = eHAL_STATUS_FAILURE;
@@ -18918,6 +18983,60 @@ eHalStatus sme_update_txrate(tHalHandle hal,
 		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
 		FL("sme_AcquireGlobalLock failed"));
 		vos_mem_free(txrate_update);
+	}
+	smsLog(mac_ctx, LOG1, FL("exit"));
+	return status;
+}
+
+/**
+ * sme_peer_flush_pending() - sme function to flush peer pending packets
+ * val
+ * @hal:    Handle for Hal layer
+ * @req:    specified flush pending
+ *
+ * Return: Hal status
+ */
+eHalStatus sme_peer_flush_pending(tHalHandle hal,
+				  struct sme_flush_pending *req)
+{
+	eHalStatus          status;
+	VOS_STATUS          vos_status;
+	tpAniSirGlobal      mac_ctx    = PMAC_STRUCT(hal);
+	vos_msg_t           vos_msg;
+	struct sme_flush_pending *flush_pend;
+
+	smsLog(mac_ctx, LOG1, FL("enter"));
+
+	flush_pend = vos_mem_malloc(sizeof(*flush_pend));
+	if (NULL == flush_pend) {
+		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+			  FL("Failed to alloc flush_pend"));
+		return eHAL_STATUS_FAILED_ALLOC;
+	}
+
+	flush_pend->session_id = req->session_id;
+	flush_pend->flush_ac = req->flush_ac;
+	vos_mem_copy(flush_pend->peer_addr.bytes, req->peer_addr.bytes,
+		     VOS_MAC_ADDR_SIZE);
+
+	status = sme_AcquireGlobalLock(&mac_ctx->sme);
+	if (eHAL_STATUS_SUCCESS == status) {
+		/* Serialize the req through MC thread */
+		vos_msg.bodyptr = flush_pend;
+		vos_msg.type = WDA_PEER_FLUSH_PENDING;
+		vos_status = vos_mq_post_message(VOS_MQ_ID_WDA, &vos_msg);
+
+		if (!VOS_IS_STATUS_SUCCESS(vos_status)) {
+			VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+				  FL("Post peer flush pending msg fail"));
+			status = eHAL_STATUS_FAILURE;
+			vos_mem_free(flush_pend);
+		}
+		sme_ReleaseGlobalLock(&mac_ctx->sme);
+	} else {
+		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+			  FL("sme_AcquireGlobalLock failed"));
+		vos_mem_free(flush_pend);
 	}
 	smsLog(mac_ctx, LOG1, FL("exit"));
 	return status;

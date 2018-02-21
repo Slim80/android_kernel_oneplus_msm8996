@@ -304,6 +304,8 @@ enum qca_nl80211_vendor_subcmds {
 	/* subcommand to get chain rssi value */
 	QCA_NL80211_VENDOR_SUBCMD_GET_CHAIN_RSSI = 138,
 	QCA_NL80211_VENDOR_SUBCMD_CHIP_PWRSAVE_FAILURE = 148,
+	/* subcommand to flush peer tids */
+	QCA_NL80211_VENDOR_SUBCMD_PEER_FLUSH_PENDING  = 162,
 };
 
 /**
@@ -1236,6 +1238,7 @@ enum qca_wlan_vendor_attr_ll_stats_results
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0))
     QCA_WLAN_VENDOR_ATTR_LL_STATS_PAD,
 #endif
+    QCA_WLAN_VENDOR_ATTR_LL_STATS_WMM_AC_PENDING_MSDU = 83,
     /* keep last */
     QCA_WLAN_VENDOR_ATTR_LL_STATS_AFTER_LAST,
     QCA_WLAN_VENDOR_ATTR_LL_STATS_MAX =
@@ -1575,6 +1578,27 @@ enum qca_wlan_vendor_features {
 	QCA_WLAN_VENDOR_FEATURE_KEY_MGMT_OFFLOAD = 0,
 	/* Additional features need to be added above this */
         NUM_QCA_WLAN_VENDOR_FEATURES
+};
+
+/**
+ * enum qca_wlan_vendor_attr_flush_pending - Attributes for
+ * flush pending traffic in firmware.
+ *
+ * @QCA_WLAN_VENDOR_ATTR_PEER_ADDR: Configure peer mac address.
+ * @QCA_WLAN_VENDOR_ATTR_AC: Configure access category the pending
+ *  packets using. It is u8 value with bit0~3 represent AC_BE, AC_BK,
+ *  AC_VI, AC_VO respectively. Set the corresponding bit to 1 to flush
+ *  packets with access category.
+ */
+enum qca_wlan_vendor_attr_flush_pending{
+	QCA_WLAN_VENDOR_ATTR_FLUSH_PENDING_INVALID = 0,
+	QCA_WLAN_VENDOR_ATTR_PEER_ADDR = 1,
+	QCA_WLAN_VENDOR_ATTR_AC = 2,
+
+	/* keep last */
+	QCA_WLAN_VENDOR_ATTR_FLUSH_PENDING_AFTER_LAST,
+	QCA_WLAN_VENDOR_ATTR_FLUSH_PENDING_MAX =
+	QCA_WLAN_VENDOR_ATTR_FLUSH_PENDING_AFTER_LAST - 1,
 };
 
 /* Feature defines */
@@ -2519,6 +2543,12 @@ enum qca_vendor_attr_txpower_scale_decr_db {
  * @QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_ANT_NF: per antenna NF value
  * @QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_IFACE_RSSI_BEACON: RSSI of beacon
  * @QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_IFACE_SNR_BEACON: SNR of beacon
+ * @QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_REPORT_TIME: u64
+ *    Absolute timestamp from 1970/1/1, unit in ms. After receiving the
+ *    message, user layer APP could call gettimeofday to get another
+ *    timestamp and calculate transfer delay for the message.
+ * @QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_MEASUREMENT_TIME: u32
+ *    Real period for this measurement, unit in us.
  */
 enum qca_wlan_vendor_attr_ll_stats_ext {
 	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_INVALID = 0,
@@ -2611,6 +2641,9 @@ enum qca_wlan_vendor_attr_ll_stats_ext {
 	/* sub-attribute for IFACE_BSS */
 	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_IFACE_RSSI_BEACON,
 	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_IFACE_SNR_BEACON,
+
+	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_REPORT_TIME,
+	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_MEASUREMENT_TIME,
 
 	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_LAST,
 	QCA_WLAN_VENDOR_ATTR_LL_STATS_EXT_MAX =
