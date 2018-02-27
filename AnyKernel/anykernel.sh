@@ -4,7 +4,7 @@
 ## AnyKernel setup
 # begin properties
 properties() {
-kernel.string=Imperium Kernel by Slim80 @xda-developers
+kernel.string=Imperium Kernel for OnePlus 3T by Slim80
 do.devicecheck=0
 do.initd=0
 do.modules=1
