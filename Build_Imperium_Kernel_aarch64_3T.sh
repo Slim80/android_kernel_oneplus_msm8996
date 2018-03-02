@@ -39,6 +39,9 @@ make ARCH=arm64 CROSS_COMPILE=${CROSS_COMPILE} -j4 INSTALL_MOD_PATH=imperium_ins
 find imperium_install/ -name '*.ko' -type f -exec cp '{}' $ANYKERNEL/modules/ \;
 
 cd $ANYKERNEL
+rm -rf version
+touch version
+echo Version $VERSION >> version
 zip -r9 Imperium_Kernel.zip *
 
 cd $SIGNAPK
