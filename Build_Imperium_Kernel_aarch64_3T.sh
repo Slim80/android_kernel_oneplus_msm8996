@@ -41,7 +41,7 @@ find imperium_install/ -name '*.ko' -type f -exec cp '{}' $ANYKERNEL/modules/ \;
 cd $ANYKERNEL
 rm -rf version
 touch version
-echo Version $VERSION >> version
+echo Version $VERSION $(date +"[%d-%m-%y]")>> version
 zip -r9 Imperium_Kernel.zip *
 
 cd $SIGNAPK
