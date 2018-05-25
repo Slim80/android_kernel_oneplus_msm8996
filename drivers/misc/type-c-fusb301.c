@@ -160,6 +160,8 @@
 #define USE_TIMER_WHEN_DFP_TO_DETETC_UFP
 extern int otg_switch;
 
+extern int otg_switch;
+
 /******************************************************************************/
 enum fusb301_drp_toggle{
 	FUSB301_TOGGLE_SNK35_SRC15 = 0,  // default
