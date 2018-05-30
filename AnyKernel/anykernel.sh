@@ -3,7 +3,7 @@
 
 ## AnyKernel setup
 # begin properties
-properties() {
+properties() { '
 kernel.string=Imperium Kernel for OnePlus 3T by Slim80
 do.devicecheck=0
 do.initd=0
@@ -13,7 +13,7 @@ do.cleanuponabort=1
 device.name1=oneplus3t
 device.name2=OnePlus3T
 device.name3=OnePlus 3T
-} # end properties
+'; } # end properties
 
 # shell variables
 block=/dev/block/bootdevice/by-name/boot;
