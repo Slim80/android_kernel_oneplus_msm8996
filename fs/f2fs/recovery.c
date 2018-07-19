@@ -583,7 +583,8 @@ int recover_fsync_data(struct f2fs_sb_info *sbi, bool check_only)
 	bool need_writecp = false;
 
 	if (s_flags & MS_RDONLY) {
-		f2fs_msg(sbi->sb, KERN_INFO, "orphan cleanup on readonly fs");
+		f2fs_msg(sbi->sb, KERN_INFO,
+				"recover fsync data on readonly fs");
 		sbi->sb->s_flags &= ~MS_RDONLY;
 	}
 
