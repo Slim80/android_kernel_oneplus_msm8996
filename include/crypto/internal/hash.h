@@ -84,7 +84,7 @@ int ahash_register_instance(struct crypto_template *tmpl,
 void ahash_free_instance(struct crypto_instance *inst);
 
 int shash_no_setkey(struct crypto_shash *tfm, const u8 *key,
-		    unsigned int keylen);
+			    unsigned int keylen);
 
 static inline bool crypto_shash_alg_has_setkey(struct shash_alg *alg)
 {
