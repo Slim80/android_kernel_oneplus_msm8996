@@ -629,9 +629,6 @@ ol_tx_ll_queue(ol_txrx_vdev_handle vdev, adf_nbuf_t msdu_list)
     if (msdu_list == NULL)
         return NULL;
 
-    if (vos_is_logp_in_progress(VOS_MODULE_ID_TXRX, NULL))
-        return msdu_list;
-
     paused_reason = vdev->ll_pause.paused_reason;
     if (paused_reason) {
         if (adf_os_unlikely((paused_reason &
@@ -2308,6 +2305,7 @@ ol_txrx_mgmt_send(
     struct ol_tx_desc_t *tx_desc;
     struct ol_txrx_msdu_info_t tx_msdu_info;
 
+    vos_mem_zero(&tx_msdu_info, sizeof(tx_msdu_info));
     tx_msdu_info.htt.action.use_6mbps = use_6mbps;
     tx_msdu_info.htt.info.ext_tid = HTT_TX_EXT_TID_MGMT;
     tx_msdu_info.htt.info.vdev_id = vdev->vdev_id;
