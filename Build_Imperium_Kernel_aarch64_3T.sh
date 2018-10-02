@@ -16,7 +16,7 @@ IMAGE="/home/slim80/Scrivania/Kernel/oneplus/Imperium/Imperium_Kernel_O/arch/arm
 ANYKERNEL="/home/slim80/Scrivania/Kernel/oneplus/Imperium/Imperium_Kernel_O/AnyKernel"
 SIGNAPK="/home/slim80/Scrivania/Kernel/oneplus/Imperium/SignApk"
 NUM_CPUS=`grep -c ^processor /proc/cpuinfo`
-VERSION=1.0-R19
+VERSION=1.0-R20
 
 find -name '*.gz*' -exec rm -rf {} \;
 find -name '*.dtb' -exec rm -rf {} \;
