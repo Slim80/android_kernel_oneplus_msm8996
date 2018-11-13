@@ -2652,10 +2652,10 @@ void hif_pci_update_status(struct pci_dev *pdev, uint32_t status)
 {
 	VOS_TRACE(VOS_MODULE_ID_HIF, VOS_TRACE_LEVEL_ERROR,
 		"%s: status=%u\n", __func__, status);
-	if (status == CNSS_SSR_FAIL) {
-		vos_set_ssr_failed(TRUE);
-		hif_pci_ssr_fail_ind();
-	}
+//	if (status == CNSS_SSR_FAIL) {
+//		vos_set_ssr_failed(TRUE);
+//		hif_pci_ssr_fail_ind();
+//	}
 }
 
 /* This function will be called when SSR framework wants to
