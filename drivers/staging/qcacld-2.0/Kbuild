@@ -61,6 +61,31 @@ ifeq ($(KERNEL_BUILD), 0)
 		endif
 	endif
 
+	# As per target team, build is done as follows:
+	# Defconfig : build with default flags
+	# Slub      : defconfig  + CONFIG_SLUB_DEBUG=y +
+	#             CONFIG_SLUB_DEBUG_ON=y + CONFIG_PAGE_POISONING=y
+	# Perf      : Using appropriate perf defconfig
+	#
+	# Shipment builds (user variants) should not have any debug feature
+	# enabled. This is identified using 'TARGET_BUILD_VARIANT'. Slub builds
+	# are identified using the CONFIG_SLUB_DEBUG_ON configuration. Since
+	# there is no other way to identify defconfig builds, QCOMs internal
+	# representation of perf builds (identified using the string 'perf'),
+	# is used to identify if the build is a slub or defconfig one. This
+	# way no critical debug feature will be enabled for perf and shipment
+	# builds. Other OEMs are also protected using the TARGET_BUILD_VARIANT
+	# config.
+	ifneq ($(TARGET_BUILD_VARIANT), user)
+		ifeq ($(CONFIG_SLUB_DEBUG_ON), y)
+			CONFIG_DPTRACE_ENABLE := y
+		else
+			ifeq ($(findstring perf,$(KERNEL_DEFCONFIG)),)
+				CONFIG_DPTRACE_ENABLE := y
+			endif
+		endif
+	endif
+
 	#Flag to enable Legacy Fast Roaming3(LFR3)
 	CONFIG_QCACLD_WLAN_LFR3 := y
 
@@ -983,6 +1008,8 @@ endif
 
 EXTRA_CFLAGS += $(INCS)
 
+EXTRA_CFLAGS += -Wno-unused-function -Wno-unused-variable
+
 CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DANI_LITTLE_BIT_ENDIAN \
 		-DQC_WLAN_CHIPSET_QCA_CLD \
@@ -993,6 +1020,7 @@ CDEFINES :=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DWLAN_PERF \
 		-DPTT_SOCK_SVC_ENABLE \
 		-Wall\
+		-Werror\
 		-D__linux__ \
 		-DHAL_SELF_STA_PER_BSS=1 \
 		-DWLAN_FEATURE_VOWIFI_11R \
@@ -1179,6 +1207,7 @@ endif
 ifeq ($(CONFIG_SLUB_DEBUG_ON),y)
 CDEFINES += -DTIMER_MANAGER
 CDEFINES += -DMEMORY_DEBUG
+CDEFINES += -DNBUF_MAP_UNMAP_DEBUG
 endif
 
 ifeq ($(HAVE_CFG80211),1)
@@ -1352,6 +1381,9 @@ CDEFINES += -DCONFIG_HL_SUPPORT
 CDEFINES += -DDEBUG_HL_LOGGING
 ifeq ($(CONFIG_QOS_FWD_SUPPORT), y)
 CDEFINES += -DQOS_FWD_SUPPORT
+endif
+ifeq ($(CONFIG_USB_WARM_RESET), y)
+CDEFINES += -DFEATURE_USB_WARM_RESET
 endif
 endif
 
@@ -1659,7 +1691,6 @@ ifeq ($(CONFIG_WLAN_OFFLOAD_PACKETS),y)
 CDEFINES += -DWLAN_FEATURE_OFFLOAD_PACKETS
 endif
 
-
 ifeq ($(CONFIG_WLAN_UDP_RESPONSE_OFFLOAD),y)
 CDEFINES += -DWLAN_FEATURE_UDP_RESPONSE_OFFLOAD
 endif
@@ -1667,6 +1698,12 @@ endif
 
 ifeq ($(CONFIG_WLAN_WOW_PULSE), y)
 CDEFINES += -DWLAN_FEATURE_WOW_PULSE
+endif
+
+#Enable Pattern Bitmap Match & Magic Pattern WOW
+ifeq ($(CONFIG_PBM_MAGIC_WOW), y)
+CDEFINES += -DWLAN_FEATURE_WOW_PULSE
+CDEFINES += -DFEATURE_PBM_MAGIC_WOW
 endif
 
 ifeq ($(CONFIG_WLAN_FEATURE_NAN_DATAPATH),y)
@@ -1695,8 +1732,6 @@ CDEFINES += -DWLAN_WAPI_MODE_11AC_DISABLE
 endif
 
 KBUILD_CPPFLAGS += $(CDEFINES)
-
-EXTRA_CFLAGS += -Wno-unused-function -Wno-unused-variable
 
 ifeq ($(call cc-option-yn, -Wheader-guard),y)
 EXTRA_CFLAGS += -Wheader-guard
